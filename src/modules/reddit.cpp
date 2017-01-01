@@ -34,8 +34,8 @@ namespace modules {
    */
   bool reddit_module::update() {
     string content{m_http->get("https://api.github.com/notifications?access_token=" + m_accesstoken)};
-    // curl -X POST -d 'grant-type=password&username=USERNAME&password=PASSWORD' --user 'APPID:APPSECRET' https://wwwereddit.com/api/v1/access_token
-    string content{m_http->get("")}
+    // curl -X POST -d 'grant-type=password&username=USERNAME&password=PASSWORD' --user 'APPID:APPSECRET' https://www.reddit.com/api/v1/access_token
+    string content{m_http->post("https//www.reddit.com/api/v1/access_token", "grant-type=password&username=" + m_username + "&password = " + m_password), app-id + ":" + app-secret};
     long response_code{m_http->response_code()};
 
     switch (response_code) {
@@ -49,9 +49,18 @@ namespace modules {
         throw module_error("Unspecified error (" + to_string(response_code) + ")");
     }
 
+    // response should look like
+    // {"access_token": "AOUFR5AiJjbLmtFGhgaz9fzLmrE", "token_type": "bearer", "expires_in": 3600, "scope": "*"}
+
     size_t pos{0};
     size_t notifications{0};
 
+    // extract the access token
+    // TODO
+
+    // make new request with token
+
+    // curl -H "Authorization: bearer TOKENTHATWEJUSTGOT" -A "ChangeMeClient/0.1 by YourUsername" https://oauth.reddit.com/api/v1/me
     while ((pos = content.find("\"unread\":true", pos + 1)) != string::npos) {
       notifications++;
     }
