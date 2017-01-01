@@ -36,6 +36,25 @@ string http_downloader::get(const string& url) {
   return out.str();
 }
 
+string http_downloader::post(const string& url, const string& post_fields) {
+  stringstream out{};
+  curl_easy_setopt(m_curl, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, post_fields.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &out);
+
+  auto res = curl_easy_perform(m_curl);
+  if (res != CURLE_OK) {
+    throw application_error(curl_easy_strerror(res), res);
+  }
+
+  return out.str();
+}
+
+string http_downloader::post(const string& url, const string& post_fields, const string& user_auth) {
+  curl_easy_setopt(m_curl, CURLOPT_USERPWD, user_auth.c_str());
+  return http_downloader(url, post_fields);
+}
+
 long http_downloader::response_code() {
   long code{0};
   curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &code);

@@ -11,6 +11,8 @@ class http_downloader {
   ~http_downloader();
 
   string get(const string& url);
+  string post(const string& url, const string& post_fields);
+  string post(const string& url, const string& post_fields, const string& user_auth);
   long response_code();
 
  protected:
