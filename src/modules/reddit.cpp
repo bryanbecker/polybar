@@ -1,4 +1,4 @@
-#include "modules/notifier.hpp"
+#include "modules/reddit.hpp"
 #include "drawtypes/label.hpp"
 
 #include "modules/meta/base.inl"
@@ -6,15 +6,19 @@
 POLYBAR_NS
 
 namespace modules {
-  template class module<notifier_module>;
+  template class module<reddit_module>;
 
   /**
    * Construct module
    */
-  notifier_module::notifier_module(const bar_settings& bar, string name_)
-      : timer_module<notifier_module>(bar, move(name_)), m_http(http_util::make_downloader()) {
-    m_accesstoken = m_conf.get(name(), "token");
-    m_interval = m_conf.get<decltype(m_interval)>(name(), "interval", 60s);
+  reddit_module::reddit_module(const bar_settings& bar, string name_)
+      : timer_module<reddit_module>(bar, move(name_)), m_http(http_util::make_downloader()) {
+    m_appid = m_conf.get(name(), "app-id");
+    m_appsecret = m_conf.get(name(), "app-secret");
+    m_username = m_conf.get(name(), "username");
+    m_password = m_conf.get(name(), "password");
+    // access token expires after 3600s
+    m_interval = m_conf.get<decltype(m_interval)>(name(), "interval", 3600s);
     m_empty_notifications = m_conf.get(name(), "empty-notifications", m_empty_notifications);
 
     m_formatter->add(DEFAULT_FORMAT, TAG_LABEL, {TAG_LABEL});
@@ -28,8 +32,10 @@ namespace modules {
   /**
    * Update module contents
    */
-  bool notifier_module::update() {
+  bool reddit_module::update() {
     string content{m_http->get("https://api.github.com/notifications?access_token=" + m_accesstoken)};
+    // curl -X POST -d 'grant-type=password&username=USERNAME&password=PASSWORD' --user 'APPID:APPSECRET' https://wwwereddit.com/api/v1/access_token
+    string content{m_http->get("")}
     long response_code{m_http->response_code()};
 
     switch (response_code) {
@@ -61,7 +67,7 @@ namespace modules {
   /**
    * Build module content
    */
-  bool notifier_module::build(builder* builder, const string& tag) const {
+  bool reddit_module::build(builder* builder, const string& tag) const {
     if (tag == TAG_LABEL) {
       builder->node(m_label);
     } else {
